@@ -56,6 +56,13 @@ class L4EloquentDatatables {
 	private $addedColumns = [];
 
 	/**
+	 * Array with date columns.
+	 * 
+	 * @var array
+	 */
+	private $dateColumns = [];
+
+	/**
 	 * The number of records.
 	 * 
 	 * @var int
@@ -148,6 +155,25 @@ class L4EloquentDatatables {
 		$this->addedColumns[$column] = $content;
 
 		return $this;
+	}
+
+	/**
+	 * Format the column by calling formatLocalized on the Carbon result.
+	 * This only works when the result is a Carbon object.
+	 * Check the Carbon documentation for formatting.
+	 * 
+	 * @param  string $column The column name
+	 * @param  string $format The format to be used by formatLocalized
+	 * @return  \Ymo\L4EloquentDatatables\L4EloquentDatatables	The datatables object
+	 */
+	public function formatDate($column, $format = '%G-%m-%d')
+	{
+		if (in_array($column, $this->columns, true))
+			$this->dateColumns[$column] = $format;
+		else
+			throw new \Exception("Cannot call a function on this column: column not found.");
+
+		return $this;		
 	}
 
 	/**
@@ -305,38 +331,44 @@ class L4EloquentDatatables {
 			$row = [];
 
 			foreach ($this->columns as $column) {
+				$output = '';
+
 				if (count(explode('.', $column)) > 1) {
 					$relationship = explode('.', $column)[0];
 					$field = explode('.', $column)[1];
 					
-					if (array_key_exists($column, $this->htmlColumns)) {
-						$html = $this->htmlColumns[$column];
+					$output = (string)$record->$relationship->$field;
 
-						for ($i = 0; $i < count($html); $i++)
-							$html[$i] = $this->parseHtml($html[$i], $record);
+					if (array_key_exists($column, $this->dateColumns)) {
+						$format = $this->dateColumns[$column];
 
-						$row[] = $html[0] . (string)$record->$relationship->$field . $html[1];
+						$output = $record->$relationship->$field->formatLocalized($format);
 					}
-					else
-						$row[] = (string)$record->$relationship->$field;
 				}
 				else {
-					if (array_key_exists($column, $this->htmlColumns)) {
-						$html = $this->htmlColumns[$column];
+					$output = (string)$record->$column;
 
-						for ($i = 0; $i < count($html); $i++)
-							$html[$i] = $this->parseHtml($html[$i], $record);
+					if (array_key_exists($column, $this->dateColumns)) {
+						$format = $this->dateColumns[$column];
 
-						$row[] = $html[0] . (string)$record[$column] . $html[1];
+						$output = $record->$column->formatLocalized($format);
 					}
-					else
-						$row[] = (string)$record[$column];
 				}
+
+				if (array_key_exists($column, $this->htmlColumns)) {
+					$html = $this->htmlColumns[$column];
+
+					for ($i = 0; $i < count($html); $i++)
+						$html[$i] = $this->parseHtml($html[$i], $record);
+
+					$output = $html[0] . $output . $html[1];
+				}
+
+				$row[] = $output;
 			}
 
-			foreach ($this->addedColumns as $column) {
+			foreach ($this->addedColumns as $column)
 				$row[] = $this->parseHtml($column, $record);
-			}
 
 			$array[] = $row;
 		}
