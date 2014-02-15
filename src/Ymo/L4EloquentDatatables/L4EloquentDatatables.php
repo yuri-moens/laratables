@@ -33,6 +33,13 @@ class L4EloquentDatatables {
 	 * @var array
 	 */
 	private $relationships;
+
+	/**
+	 * Array of all where clauses with their optional relationships.
+	 * 
+	 * @var array
+	 */
+	private $whereClauses = [];
 	
 	/**
 	 * Array of all columns that should be retrieved.
@@ -158,6 +165,27 @@ class L4EloquentDatatables {
 	}
 
 	/**
+	 * Add a where clause to the main model or a relationship.
+	 * 
+	 * @param array $where  The where clause
+	 * @param string $relationship	The optional relationship
+	 * @return  \Ymo\L4EloquentDatatables\L4EloquentDatatables	The datatables object
+	 */
+	public function addWhere($where, $relationship = null)
+	{
+		if (is_null($relationship))
+			$this->whereClauses[] = $where;
+		else {
+			if (in_array($relationship, $this->relationships, true))
+				$this->whereClauses[] = [ $where, $relationship ];
+			else
+				throw new \Exception("Could not add where clause: relationship  not found.");
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Format the column by calling formatLocalized on the Carbon result.
 	 * This only works when the result is a Carbon object.
 	 * Check the Carbon documentation for formatting.
@@ -230,10 +258,28 @@ class L4EloquentDatatables {
 	 */
 	private function query()
 	{
+		$query;
+
 		if (is_null($this->relationships))
-			return $this->model->newQuery();
+			$query = $this->model->newQuery();
 		else
-			return $this->model->with($this->relationships); 
+			$query = $this->model->with($this->relationships);
+
+		foreach ($this->whereClauses as $whereClause) {
+			if (count($whereClause) == 3) { // where on main model
+				$query->where($whereClause[0], $whereClause[1], $whereClause[2]);
+			}
+			else { // where on relationship model
+				$where = $whereClause[0];
+				$relationship = $whereClause[1];
+
+				$query->whereHas($relationship, function($q) use (&$where) {
+					$q->where($where[0], $where[1], $where[2]);
+				});
+			}
+		}
+
+		return $query;
 	}
 
 	/**
@@ -402,18 +448,21 @@ class L4EloquentDatatables {
 	 */
 	private function parseHtml($html, $record)
 	{
-		if ($start = strpos($html, '{')) {
-			$start++;
-			$len = strpos($html, '}') - $start;
+		do {
+			if ($start = strpos($html, '{')) {
+				$start++;
+				$len = strpos($html, '}') - $start;
 
-			$param = substr($html, $start, $len);
+				$param = substr($html, $start, $len);
+				$result = $record;
 
-			foreach (explode('->', $param) as $p)
-				$record = $record->$p;
+				foreach (explode('->', $param) as $p)
+					$result = $result->$p;
 
-			$len += 2;
-			$html = substr_replace($html, $record, --$start, $len++);
-		}
+				$len += 2;
+				$html = substr_replace($html, $result, --$start, $len++);
+			}
+		} while (strpos($html, '{') !== false);		
 
 		return $html;
 	}
