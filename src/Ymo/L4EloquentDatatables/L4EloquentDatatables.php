@@ -382,8 +382,11 @@ class L4EloquentDatatables {
 				if (count(explode('.', $column)) > 1) {
 					$relationship = explode('.', $column)[0];
 					$field = explode('.', $column)[1];
-					
-					$output = (string)$record->$relationship->$field;
+
+					if (is_null($record->$relationship))
+						$output = '';
+					else
+						$output = (string)$record->$relationship->$field;
 
 					if (array_key_exists($column, $this->dateColumns)) {
 						$format = $this->dateColumns[$column];
@@ -400,6 +403,8 @@ class L4EloquentDatatables {
 						$output = $record->$column->formatLocalized($format);
 					}
 				}
+
+				$output = e($output);
 
 				if (array_key_exists($column, $this->htmlColumns)) {
 					$html = $this->htmlColumns[$column];
@@ -457,7 +462,8 @@ class L4EloquentDatatables {
 				$result = $record;
 
 				foreach (explode('->', $param) as $p)
-					$result = $result->$p;
+					if (!is_null($result))
+						$result = $result->$p;
 
 				$len += 2;
 				$html = substr_replace($html, $result, --$start, $len++);
