@@ -1,6 +1,6 @@
-# l4-eloquent-datatables
+# Laratables
 
-A Laravel 4 package to convert Eloquent queries into JSON output to work with Datatables.
+A Laravel package to convert Eloquent queries into JSON output to work with Datatables.
 
 ## Installation
 
@@ -8,7 +8,7 @@ Add the following to your `composer.json` file.
 
 ```
 require {
-	"ymo/l4-eloquent-datatables": "dev-master"
+	"ymo/laratables": "dev-master"
 }
 ```
 
@@ -16,17 +16,17 @@ Run `composer update`.
 
 Open `app/config/app.php` and add:
 
-`'Ymo\L4EloquentDatatables\L4EloquentDatatablesServiceProvider',`
+`'Ymo\Laratables\LaratablesServiceProvider',`
 
 Also add the alias:
 
-`'Datatables'      => 'Ymo\L4EloquentDatatables\L4EloquentDatatables',`
+`'Laratables'      => 'Ymo\Laratables\Facades\LaratablesFacade',`
 
 ## Usage
 
-Use the model function to set the main Eloquent model and create an L4EloquentDatatables object.
+Use the model function to set the main Eloquent model.
 
-`$dt = Datatables::model('NewsItem');`
+`$dt = Laratables::model('NewsItem');`
 
 Set any optional relationship you want to use.
 
@@ -49,14 +49,14 @@ Additional columns can also be added manually.
 
 Get the JSON output.
 
-`$reponse = $dt->make();`
+`$response = $dt->make();`
 
 ### Chaining
 
 The property setters all return the L4EloquentDatatables object so you can easily chain commands. The aforementioned example can be rewritten as following.
 
 ```
-Datatables::model('NewsItem') 
+Laratables::model('NewsItem') 
 	->with('user', 'newsCategory')
 	->columns([ 'id', 'title', 'user.first_name', 'newsCategory.name', 'created_at', 'updated_at' ])
 	->wrapHtml('title', '<a href="news/{id}/edit">', '</a>')
