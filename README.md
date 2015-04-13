@@ -8,11 +8,11 @@ Add the following to your `composer.json` file.
 
 ```
 require {
-	"ymo/laratables": "dev-master"
+	"ymo/laratables": "~2"
 }
 ```
 
-Run `composer update`.
+Run `composer install`.
 
 Open `app/config/app.php` and add:
 
@@ -21,6 +21,10 @@ Open `app/config/app.php` and add:
 Also add the alias:
 
 `'Laratables'      => 'Ymo\Laratables\Facades\LaratablesFacade',`
+
+And publish the configuration from the command line:
+
+`php artisan vendor:publish`
 
 ## Usage
 
@@ -61,7 +65,7 @@ Laratables::model('NewsItem')
 	->columns([ 'id', 'title', 'user.first_name', 'newsCategory.name', 'created_at', 'updated_at' ])
 	->wrapHtml('title', '<a href="news/{id}/edit">', '</a>')
 	->wrapHtml('user.first_name', '<a href="users/{user->id}/edit">', '</a>')
-	->addColumn('delete','<a class="btn btn-danger" href="news/{id}" data-method="delete">Delete</a>')
+	->addRawColumn('delete','<a class="btn btn-danger" href="news/{id}" data-method="delete">Delete</a>')
 	->make();
 ```
 

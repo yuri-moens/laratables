@@ -1,24 +1,24 @@
 {
-    "name": "ymo/laratables",
-    "type": "library",
-    "description": "A package to easily transform your Eloquent models into Datatables-usable JSON.",
-    "keywords": ["datatables", "laravel", "eloquent"],
-    "homepage": "https://github.com/yuri-moens/laratables",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Yuri Moens",
-            "email": "yuri.moens@gmail.com"
-        }
-    ],
-    "require": {
-        "php": ">=5.4.0",
-        "illuminate/support": "~4|~5"
-    },
-    "autoload": {
-        "psr-4": {
-            "Ymo\\Laratables\\": "src/"
-        }
-    },
-    "minimum-stability": "dev"
+  "name": "ymo/laratables",
+  "type": "library",
+  "description": "A package to easily transform your Eloquent models into JSON to be used by Datatables 1.10+.",
+  "keywords": ["datatables", "laravel", "eloquent"],
+  "homepage": "https://github.com/yuri-moens/laratables",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Yuri Moens",
+      "email": "yuri.moens@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "illuminate/support": "~5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ymo\\Laratables\\": "src/Laratables/"
+    }
+  },
+  "minimum-stability": "dev"
 }
